@@ -140,7 +140,7 @@
     - Intérêt : si plusieirs processeurs existent dans le système, des parties penvent être exécutées "independamment"
     - Comme certaines données sont partagées, il faut éviter es conflits et les incohérences
 
-
+//
 
 
 
