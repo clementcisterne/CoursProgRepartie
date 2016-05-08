@@ -17,6 +17,7 @@
     PLAN:
 
     - Rafraichir des connaissance sur les processus et sur les threads
+
     - Etudies des communication / coopération entre des processus locaux mais aussi distants
         - Communication entre processsus
         - Communication entre tâches (threads)
@@ -24,6 +25,7 @@
         - Problèmes issus du fonctionnemen parallèle
             --> Utilisation des ressources critiques et/ou limitées
             --> Synchroniser de processus
+
     - Etudier les implémentations en JAVA
 
 
@@ -34,11 +36,14 @@
         - Problème de la concurence
         - Ressources (et sections) critiques
         - Exlusion mutuelle
+
     - Outils
         - Verrouillage, verrous
         - Sémaphores
         - Barrières
+
     - Synchronistion des processus
+
     - Communication entre processus distants
         - Rappels des réseaux
         - Boîtes aux lettres
@@ -55,17 +60,22 @@
         - Chaque processus possède :
             - un segment (zone d'adressage contiguë) de texte (du programme) qui est invariant
             - un segment de données qui s'évolue avec l'exécution
+
         - Contexte du processus : il doit donner les informations usr l'execution des procédures (des fonctions par exemple)
             --> Réalisé sous forme d'une pile d'exécution (pour sauvegarder les contextes, les valeurs passées ...)
+
         - Contexte du processus : il doit donner les informations sur l'etat du processus
             --> contenu des registres, du compteur ordinal, drapeaux ...
+
         - Les processus doivent partager (et attendre) les ressources communes (CPU, mémoire, périphériques, fichiers etc ...)
 
 
 // Communciation entre processus fils et père
 
     - L'appel systeme fork() crée un processus fils par une copie de son père (zone du texte et de données)
+
     - Le fils "hérite" des fichiers de redirections, mais utilise des variables, des tampons différents
+
     - Dans le code :
         - Le fils recoit le code de retour = 0
         - Le père recoit le PID de son fils
@@ -131,50 +141,63 @@
     Thread : sous-processus qui s’exécutent au sein d’un processus
 
     - Chaque provessus a une tâche initiale (main)
+
     - Chaque thread possède :
         - Son propre mot d'etat (PSW), son propre context du processeur
         - Une pile (variables locales)
+
     - Les threahds partagent :
         - Le code
         - Les données globales et/ou statiques
+
     - Intérêt : si plusieirs processeurs existent dans le système, des parties penvent être exécutées "independamment"
     - Comme certaines données sont partagées, il faut éviter es conflits et les incohérences
 
+    ...
 
-//
+// Création des threads, héritage de la classe Thread
+
+// Thread par implémentation de Runnable
+
+// Méthodes utiles de la classe Thread
+
+// Threads et programme principale
+
+// Partage des variables entre threads
+
+// Exemple du partage
+
+// Résultats de l’exécution
+
+// Exécution des programmes concurrentiels
+
+// Un groupe de tâches
+
+// Exemple de Executor
+
+// Résultats de l’exécution
+
+// Un autre Executor
+
+// Résultats de l’exécution
+
+// Problème de l’interface Runnable
+
+    - L'interface a 2 limitations :
+        - la methode run() ne peut revoyer aucune valeur (cf. void)
+        - On ne peut lance aucune exeption
+
+    - Nouvelle interface dans (java.util.concurent.Callable)
+        public interface Callable<V> {
+            public V call() throws Exception;
+        }
+
+    - Un résultat du type V (programmation template) est prévu
 
 
+// Exemple de l’interface Callable<V>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// Utilisation des Executors pour des Callable<V>
 
 
 
