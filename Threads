@@ -157,17 +157,146 @@
 
 // Création des threads, héritage de la classe Thread
 
+    - En java la classe qui hérite de la class Thread doit surcharger la méthode run()
+
+    - Une instnce de Affiche_tahce est lancée avec les méthode start() défine patr la classe Thread
+
+            a.start();
+
+    - Après start(), l'objet passe à l'etat "Prêt" (mais ne se démarre pas forcement immédiatement)
+      C'est la JVM qui démarre le fonctionnement par l'execution de la méthode run()
+
+    - Le Thread se termine quand la méthode run() se termine
+
+
 // Thread par implémentation de Runnable
+
+    - On peut aussi créer un Trhead par une calsse qui implémente l'interface Runnable qui neccéssite la méthode run()
+        class Affichage_tache2 implements Runnable {
+            Affichage_tache2() { ... } // constructeur
+            public void run() { ... } // activité
+        }
+      --> Cette classe n'est ps un thread
+
+    - La classe Thread a une contsrusteur qui prend en compte une instance implkémentant Runnable en argument.
+      Su une telle instance de Treah, on appel la méthode start() pour executer la tâche
+            public static void main(String[] args) {
+                Affichage_tache2 a = new Affichage_tache2();
+                Thread t = new Thread(a);
+                t.start();
+            }
+    - le thread se termine quand sa méthode run() se termine
+
 
 // Méthodes utiles de la classe Thread
 
+    La  classe Thread possède des méthodes pour controler le comportement des threads
+
+        - static void sleep(long ms)
+            Le thread sera bloqué pendant ms millesecaonde (d'autres threads êuvent alors s'exécuter)
+            Attention : appel avec Treahd.sleep(400)
+
+        - boolean isAlive()
+            retourne vair si le thread est  vivant (sa méthode run() n'est pas encore terminée, donc il est "Prêt", "Bloqué" ou "Elu")
+
+        - int getPriority()
+          void setPriority()
+            Traitent la priorité du thread
+
+        - static void yield()
+            le thhread appelant passe le l'etat "Elu" (Runnig) à l'état "Prêt" (Runnable)
+
+
 // Threads et programme principale
+
+    En C, quand le programmen principale se termine, on quitte l'executable
+        - pour attendre la fin de l'exécuion du thread T1 dans le main d'un programme en C :
+            int main() {
+                pthread_t T1;
+                int iret1 = pthread_create( &T1, NULL, th_function,(void*) message1);
+
+                ...
+
+                /* attendre que le thread T1 se termine */
+                pthread_join( T1, NULL);
+                exit(0);
+            }
+
+    Contrairement aux normes POSIX, les threads en Java de sont pas arretés quand le programme pronvipale (letread main) se terminse
+            - En Java, le programme ce termine quand les Threads lancés sont terminés
+                public class ex2 extends Thread {
+                    public void run() {... des impressions : Je suis T1... }
+
+                    public static void main(String args[]) {
+                        ex2 T1 = new ex2(1); ex2 T2 = new ex2(2);
+                        T1.start(); T2.start();
+                        System.out.println("main : T1, T2 sont lancees" );
+                        System.out.println("main : termine" );
+                    }
+                }
+
+                >>> TD1$ java ex2
+                main : T1, T2, T3 sont lancees
+                main : termine
+                Je suis T1 1 ...
+                Je suis T2 1 ...
+
+            - Cependant, un Thread peut attendes la fin de l'exécution d'un autre Thread (par ex. t2) en utilisant la méthode join()
+                t2.join();
+
 
 // Partage des variables entre threads
 
+    - Les threads d'un même processus partagent la mémoire
+        - Ils penvent accéder aux variables globales
+        - ils ont une pile (des variables locales propores) chacun
+        - Ils instancient une (dezs) classes(s) ; les règle de l'accessibilité des membres sont les règles connues pour les classes
+        - Rappel
+            - données proporees de l'objets vs données statiques (partagées)
+            - données privées, protégées et publiques
+
+
 // Exemple du partage
 
+    public class partage extends Thread {
+
+        private static String chaine = "";
+        private String nom;
+        partage ( String s ) { nom = s; }
+
+        public void run()
+        {
+            for (int i = 0; i<10; i++)
+            {
+                chaine = chaine + nom;
+                try { Thread.sleep(100); }
+                catch(InterruptedException e) {}
+            }
+        }
+
+        public static void main(String args[]) {
+            Thread T1 = new partage( "T1" );
+            Thread T2 = new partage( "T2" );
+            T1.start();
+            T2.start();
+
+            try { sleep(1000); }
+            catch(InterruptedException e) {}
+            System.out.println( chaineCommune );
+        }
+
+    }
+
+
 // Résultats de l’exécution
+
+    - molnar@molnar-laptop $ java partage
+      T1T2T1T2T2T2T2T1T2T1T2T1T2T1T2
+
+    - Au lieu de 2à éléments, il n'y en a que 15
+
+    - Comment expliquer ces résultats ?
+
 
 // Exécution des programmes concurrentiels
 
