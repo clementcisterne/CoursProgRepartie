@@ -155,6 +155,7 @@
 
     ...
 
+
 // Création des threads, héritage de la classe Thread
 
     - En java la classe qui hérite de la class Thread doit surcharger la méthode run()
@@ -300,11 +301,116 @@
 
 // Exécution des programmes concurrentiels
 
+    Cas de base :
+        - Supposons un seul processeur partagé par plusieurs processus
+
+        - Supposons que le processeur est partagé par plusieurs threads
+
+        - Le contrôle passe d'un thread à l'autre
+            - seul le contect des threads (pas exemple la pile) doit être changé
+
+    Ordonnancement :
+        - Il existe un ordonnanceur (scheduler) pour gérer les processus/threads
+
+        - Les tâches initialisées, interrompues; bloqué sont mises dans une file
+
+        - Des politiques différentes peuvent être envisagée pour gérer les files d'attentes
+            - réaliser un tourniquet (fair play)
+            - selection basée sur des priorités ...
+
+    Question : Que fait lacommande nice sous linux ?
+
+    Ordonnaceur :
+        - Le thread JAVA à exécuter est choisi parmi les threads qui sont prêts
+
+        - l'ordonnanceur JAVA est :
+            -  préemptif (l'ordonnacur peut interrompre une tâche pour donner les ressources à une autre tâche )
+            - basé sur une priorité (l'ordonnaceur essaye de donner les ressources à une tâche prioritaire )
+
+        - L'ordonnaceur dépend de l'implémentation de JVM :
+             - green thread, c'est la JVM qui implémente l'ordonnacement (UNIX)
+             - thread natif, c'es le système d'exploitation hôte de la JVM qui effectue l'ordonnacement
+
 // Un groupe de tâches
+
+Thread Pool
+    - Un nombre important de thread peut encombrer la JVM
+
+    - La poilitique, la gestion des threads doit être paramétrée
+
+    - Un groupe de threads, géré par un gestionnaire : thread pool
+
+    - Le système gère les tâches selon sa propore politique et selon l'état des tâches
+
+    - Il est possible de créer des gestionnaire de tâches qui gèrent un ensemble de tâches
+
+    - Les comportement sont définis par les interfaces :
+
+        Executor (pour Runnable)
+        ExecutorService (pour Runnable et Callable) implement Executor
+        ScheduledExecutorService (pour exécution périodique) implement ExecutorService
+            //import java.util.concurrent.Executor;
+
+Interface executor
+    - Elle prévoit de "gerer" des threads
+
+    - idée : dissocier la soumission des traitement de leur exécution
+
+    - Une seule méthode :
+        void execute (Runnable command)
+
+    - Classes existantes qui l'implémentent
+        AbstractExecutorService, ForkJoinPool,
+        ScheduledThreadPoolExecutor, ThreadPoolExecutor
+
+    - Implémentation simple :
+
+        class MonExecutor implements Executor {
+            public void execute(Runnable r) {
+                r.run();
+            }
+        }
+
+    - Des instances de gestion peuvent être crées par la fabrique Executors
+        AbstractExecutorService
+        ThreadPoolExecutor
+        ScheduledThreadPoolExecutor
+
+    - Différentes créations d'Executor dans la classe Executors
 
 // Exemple de Executor
 
-// Résultats de l’exécution
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
+class ex_thread implements Runnable {
+    private int nbr;
+    // constructeur
+    ex_thread (int nb) { nbr=nb; }
+    public void run() {
+        for (int nombre=1; nombre <10;nombre++) {
+            System.out.println("appel de thread " + nbr + " " + nombre);
+            try { Thread.sleep(50); // milliseconds
+            } catch (InterruptedException e) { }
+         }
+    }
+}
+
+    public class executor_ex {
+        public static void main(String args[]) {
+            Executor executor = Executors.newSingleThreadExecutor();
+                //fabrique d?executor
+             ex_thread ex1 = new ex_thread(1);
+             ex_thread ex2 = new ex_thread(2);
+             executor.execute( ex1);
+             executor.execute( ex2);
+             }
+     }
+
+// Résultats de l'exécution
+
+    - Ce gestionnaire exécute les activités de manière asynchrone vis-à-vis du thread courant,
+       mais assure qu?elles seront appelées dans l?ordre de leurs lancements
 
 // Un autre Executor
 
@@ -314,10 +420,11 @@
 
     - L'interface a 2 limitations :
         - la methode run() ne peut revoyer aucune valeur (cf. void)
-        - On ne peut lance aucune exeption
+        - On ne peut lance aucune exception
 
     - Nouvelle interface dans (java.util.concurent.Callable)
-        public interface Callable<V> {
+
+        ublic interface Callable<V> {
             public V call() throws Exception;
         }
 
@@ -330,3 +437,6 @@
 
 
 
+
+
+clementcisterne

@@ -1,0 +1,174 @@
+/* Concurrence entre processus */
+
+
+// Accès concurrents
+    exemple du train : passage unique sur un segment
+
+        - Trains              : des "processus" ou " des tâches"
+        - Voie unique         : section critique
+        - Contrôle de la voie : exclusion mutuelle - méthode qui permet de s'asurer que si un processus ou thread utilise une
+                                ressource (partagèe), les autres processus seront excluent de cette même activité
+
+    L'exclusion mutuelle empèche que 2 trains (threads) se retrouvent simultanement sur la voie unique (dans leur sections critiques)
+
+    La section critique d'un programme est une opération indivisible, atomique vu de l'extérieur
+
+    exemple dîner des philosophesg :un probleme d'utilisation concurrencielle des ressources
+
+        - Philosohpe (thread) : il réfléchit, il peut avoir faim(attrapper une fourchette), il mange s'il a 2 fouchettes
+
+        - Organisation : ordonnecement et sémaphores
+            - Malgrè les sémaphores, une mauvaise allocation de fourchettes conduit à un interblocage
+            - Plusieurs solutions sont envisageables :
+                - un ordonnaceur externe donne les droits
+                - communications entre les philosophes
+                - temps d'attente aléatoire
+
+
+// Problèmes liés à l’utilisation concurrentielle des variables
+
+    Perte de mise à jour
+        - une tache T1 exécute une mise à jour calculée à partir d'une valeur lue (périmée)
+        - la valeur lue est modifiée (depuis la lecture de T1) par T2
+        - la mise à jour de T2 est donc écrasée
+
+
+    Lecture non reproductible
+        - une tâche relit uen valeur déjà lue par elle mais obtient une valeur différente
+        - la valeur a été modifiée par une autre tâche entre temps
+
+
+    Incohérence de mise à jour
+        - des valeurs liées par une contrainte d'intégrité sont mises à jour par 2 tâches ans des ordres différents
+        - ce qui implique la violation de la contrainte
+
+
+    Une solution : verrouillage deux phases
+        Règles : - chaque variable est protégée par des verrous (en écriture et en lecture)
+                 - pour accéder à une variable, il faut demander implicitement un verrou
+                    - on ne peut pas donner un verrou en écriture sur uen variable en lecture
+                    - on en peut pas doner un verrou en lecture ou en écriture sur une varibale en cours d'écriture
+                    - on peut accorder plusieurs verrous en lecture Fsimultanée
+
+        Implémentation :
+                 - Première phase : acquétir tous les verrous dont la tâche a besoin
+                 - Deuxième phase : relâcher les verrous à la fin des manipulations
+
+
+    Verouillage deux phases : illustration
+
+        //poser des verrous ici
+
+        if ( A > 3 )
+            X = X + 1;
+        else
+            Y = Y + 1;
+
+        //liberer els verrous
+
+    Les verrous :
+        - variable A : en lecture
+        - variables X et Y : en écriture
+
+
+// Exclusion mutuelle
+
+
+
+
+// Réaliser l’exclusion mutuelle - première idée
+
+
+
+
+// Verrous en Java - une solution simple pour se synchroniser
+
+
+
+
+// Méthode synchronized, première exemple
+
+
+
+
+// Méthode synchronized, résultats de la première exemple
+
+
+
+
+// Méthode synchronized, deuxième exemple
+
+
+
+
+// Méthode synchronized, résultats de la deuxième exemple
+
+
+
+
+// Méthode synchronized, troisième exemple
+
+
+
+
+// Méthode synchronized, résultats de la troisième exemple
+
+
+
+
+// Verrous en Java - l’interface Lock
+
+
+
+
+// Utilisation de l’interface Lock
+
+
+
+
+// Exemple de la flexibilité de l’interface Lock
+
+
+
+
+// Gestion des verrous liés aux objets
+
+
+
+
+// Exemple : une classe Evenement
+
+
+
+
+// Réaliser l’exclusion mutuelle - deuxième idée
+
+
+
+
+// Implémentations des sémaphores en Java
+
+
+
+
+// Sémaphores avec valeur
+
+
+
+
+// La classe Semaphore depuis Java 1.5
+
+
+
+
+// Sémaphores et verrous
+
+
+
+
+// Variables atomiques en Java
+
+
+
+
+// Utilisation des variables ”atomiques”
