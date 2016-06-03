@@ -73,22 +73,109 @@
 
 // Exclusion mutuelle
 
+  - L'eclusion mutuelle est une méthode qui permet à un processus ou thread d'utilisr un ressource critique
+    et d'exclure les autres processus de cette activité
+    La mise en oeuvre de l'eclusion mutuelle peut être variée
 
+  - La section critique dans un programme est la partie à partir de laquelle on accède à une ressource partagée et critique
+
+    Pour éviter les problèmes concurrentiels, il faut empêcher que 2 processus se retrouve dans leurs section critiques en même temps
+
+    Exigeance par rapport aux solutions
+        - solution identique pour toutes les tâches
+        - toute tâche reste un temps fini en section critique
+        - une seule tâche en section critique
+        - le blocage mutuel des tâches (interblocage) à l'entrée de la section critique doit être évité
+        - une tâche bloquée hors de la se'ction critique ne doit pas empêcher uen autre tâches d'y entrer
+        - une tâche qui se détruit en section critique ne doit pas bloquer l'usagede la section critique
 
 
 // Réaliser l’exclusion mutuelle - première idée
 
+    Pour réaliser une exclusion mutuelle, on peut utiliser des verrous
+        - un verrou est un objet(une variable) qui possède une clé
+        - Son utilisation :
+            - Pour faire uen activité, il faut demander et avoir la clé du verrou
+            - si la clé n'est pas disponible, le demandeur doit (ou il peut) attendre que la clé se libère
 
+    Remarque : la généralisation pour des verrous à n clés est possible
+
+    - Lorsqu'un thead entre dans sa section critique, il demande le verrou
+        - S'il peut l'avoir, il peut exécuter sa section critique
+        - S'il n'a pas le verrou, parce qu'un autre thread l'utilise, il est bloqué et attend que le verrou se libère
+
+    - Exemple : les verrous dans les BD SQL
+        - Les ressources critique sont des données
+        - Les manipulations sont organisé en transactions
+        - Au début d'une transaction, on peut poser des verrous
+        - La lecture des valeurs préserntes avant la transaction est toujours possible
+        - La fin de la transaction est toujours possible
+
+        begin ;
+        select * from client ;
+        lock table biere in exclusive mode ;
+        lock table bar in row share exclusive mode nowait ;
+        delete from biere where quantite < 15 ;
+        ...
+        commit ;
 
 
 // Verrous en Java - une solution simple pour se synchroniser
 
+    Java offre la possiblité de synchronisation des objets et des méthodes à l'aide du mot clé synchronized
 
+        - Une section critique peut être verrouiléé :
+            - En utilisant un objet "verrou" (un seul thread peut avoir le verrou...)
+
+            synchronized(un_verrou) {
+                ... //section critique
+            }
+
+        - en réalisant par une méthode (le verrou est l'objet courrant)
+
+            class une_classe {
+            ...
+
+                public synchonized void methode() {
+                    ... // section critique
+                }
+            }
+
+        - un seul thread peut avoir le verrou d'un section critique englobée pas cette synchronisation
+
+        - le verrou appartient à l'objet -> 2 objets d'un même classe doivent utiliser une méthode static
 
 
 // Méthode synchronized, première exemple
 
+    public class ex12_partage extends Thread {
+        private static String chaineCommune = "";
+        private static int cpt = 0;
+        private String nom;
+        ex12_partage ( String s ) { nom = s; }
 
+        public void run() {
+            for (int i = 0; i<10; i++) {
+                chaineCommune = chaineCommune + nom;
+                cpt++;
+                try {
+                Thread.sleep(100); // milliseconds
+                } catch(InterruptedException e) {}
+            }
+        }
+        public static void main(String args[]) {
+            Thread T1 = new ex12_partage( "T1 " );
+            Thread T2 = new ex12_partage( "T2 " );
+            T1.start();
+            T2.start();
+            try {
+                Thread.sleep(1000); // milliseconds
+            } catch(InterruptedException e) {}
+
+            System.out.println( chaineCommune );
+            System.out.println( cpt );
+        }
+    }
 
 
 // Méthode synchronized, résultats de la première exemple
@@ -143,32 +230,121 @@
 
 // Réaliser l’exclusion mutuelle - deuxième idée
 
+    Pour réaliser l'exclusion mutuelle, on peut utiliser des sémaphores
+        - Un sémaphore est un objet (une variable) accesible uniqement à l'aide des opération atomiques P() et V() (définition de Dijkstra)
 
+        - les opérations :
+            - P()
+                - S = S - 1
+                - si S < 0 alors le demandeur est bloqué dans une file spécifique au sémaphore
+
+            - V()
+                - S = S + 1
+                - si S >= 0 alors une des demandeurs bloquées dans la file est débloué selon la politique appliquée
+
+        Remarques : la valeur initial de S (le nombre de jetons) determine le nombre maximal de processus concurrentiels.
+                    la méthode P() peut être bloquante mais pas V()
 
 
 // Implémentations des sémaphores en Java
 
+    - Lorsqu'un thread veut entrer dans sa section critique, il appel P()
+        - S'il peut passer, il peut exécuter sa section critique et pour terminer, il appelle V()
 
+        - S'il ne peut pas, il attend qu'un jeton se libère
 
 
 // Sémaphores avec valeur
 
+    - Ce sont des sémaphores à plusieurs jetons (qui permettent d'allouer plusieurs jetons à la fois)
+
+    public class Semaphore {
+        private int nb_jetons;
+        private int nb_max;
+        ...
+        synchronized public void P(int val) {
+            while (nb_jetons < val) { wait (); }
+            nb_jetons = nb_jetons - val;
+        }
+        // wait() -> mise en file d’attente
+
+        synchronized public void V(int val) {
+            nb_jetons = nb_jetons + val;
+            if (nb_jetons > nb_max)
+            nb_jetons = nb_max;
+            notify();
+            // réveiller des tâches en attente
+        }
+    }
 
 
 
 // La classe Semaphore depuis Java 1.5
 
+    - Une classe disponible
+        // import java.util.concurrent.Semaphore pour l’utiliser
+        class Semaphore {
+            ...
+            public void acquire()
+            // Acquires a permit from this semaphore, blocking until
+            // one is available, or the thread is interrupted.
 
+            public void acquire(int permits)
+            // Acquires the given number of permits
+
+            public int availablePermits()
+            // Returns the current number of permits available
+
+            public Collection<Thread> getQueuedThreads()
+            // Returns a collection containing threads waiting
+            // to acquire
+
+            public boolean isFair()
+            // Returns true if this semaphore has fairness set
+            // true.protected => FIFO order in the queue
+
+            public void release()
+            // Releases a permit, returning it to the semaphore
+
+            public boolean tryAcquire()
+            // Acquires a permit from this semaphore, only if
+            // one is available at the time of invocation
+            ...
 
 
 // Sémaphores et verrous
 
+    - Un sémaphore à 1 jeton est très similaire à un verrou
 
+    - Cependant, ils sont légèrement différents
+        - pour un sémaphore, si l'on effectue plusieurs fois l'operation V(), il garde et traite en mémoire les demande (en incrémentant l'entier qu'il utilise)
+        - pour un verroun effectuer plusieurs dévérouillage est strictement équivalent à n"effectuer qu'un seul déverouillage
+        - on peut ainsi voir plusieur opérations V() sucessives sur un sémaphore comme des notify() 'retardés' sur un verrou)
 
 
 // Variables atomiques en Java
 
+    - Variable "volatiles" qui permettent de les accéder (en consultation ou en modification) en exclusion mutuelle
 
+    - Exemples : AtomicBoolean, AtomicInteger, AtomicLong, AtomicReference, AtomicLongArray, AtomicReferenceArray
+
+    - Gestion efficace grâce à l'utilisation de TAS (la section critique est très courte)
+
+    - Voir package java.util.concurrent.atomic
 
 
 // Utilisation des variables ”atomiques”
+
+    - Exemple
+
+        public class Counter {
+            private AtomicInteger count = new AtomicInteger(0);
+            public void incrementCount() {
+                count.incrementAndGet();
+            }
+            public int getCount() {
+                return count.get();
+            }
+        }
+
+    - Cette classe garantie qu’une seule tâche incrémente et/ou accède à la valeur
